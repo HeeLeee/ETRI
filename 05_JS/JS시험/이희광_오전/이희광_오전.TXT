@@ -1,0 +1,39 @@
+2조 최재원
+
+1. 코드 참조
+
+2.
+//js
+
+// 1, 2번 포괄 (객체 메소드가 나눗셈)
+function Test(_a, _b) {
+  this.a = _a;
+  this.b = _b;
+  this.doDiv = function() {
+    return (this.a / this.b);
+  }
+}
+
+function div(x, y) {
+  var t = new Test(x, y);
+  return t.doDiv();
+}
+
+div(100, 10) // 10
+
+3.
+
+1)
+객체 확인용 코드
+console.log(
+  "객체이름.신체정보.키 : " + person.신체정보.키 + '\n' +
+  "객체이름.신체정보.몸무게 : " + person.신체정보.몸무게 + '\n' +
+  "객체이름.이름.한글이름 : " + person.이름.한글이름 + '\n' +
+  "객체이름.이름.영문이름 : " + person.이름.영문이름 + '\n' +
+  "객체이름.나이 : " + person.나이
+)
+
+2)
+외부스크립트와 내부스크립트를 한 곳에서 사용하면, 외부스크립트만 불러와 동작하고
+script태그 내부에 작성한 코드는 무시된다.
+따라서, 이 둘을 하나의 script 태그에서 동시에 사용할 수 없다. (객체이름: person)

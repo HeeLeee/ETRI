@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <title></title>
+  </head>
+  <h1>test1-03</h1>
+  <body>
+    <h3>1) </h3>
+    <span id="num1"></span>
+    <hr/>
+    <h3>2) </h3>
+    외부스크립트와 내부스크립트를 한 곳에서 사용하면, 외부스크립트만 불러와 동작한다.<br/>
+    따라서, 이 둘을 하나의 script 태그에서 동시에 사용할 수 없다. (객체이름: person)<br/>
+    <hr/>
+    <span id="test"></span>
+    <script type="text/javascript" src="./test1-03.js">
+      window.alert("내부스크립트입니다");
+      var obj = "FAKE";
+      var inScript = "I'm InnerScript";
+      document.getElementById('test').innerHTML += inScript + '\n';
+    </script>
+  </body>
+</html>
