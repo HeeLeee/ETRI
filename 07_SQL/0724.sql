@@ -1,0 +1,185 @@
+--다중열서브쿼리 PAIRWISE
+SELECT EMPLOYEE_ID, MANAGER_ID, DEPARTMENT_ID
+FROM EMPLOYEES
+WHERE (MANAGER_ID, DEPARTMENT_ID) IN
+        (SELECT MANAGER_ID,DEPARTMENT_ID
+        FROM EMPLOYEES
+        WHERE EMPLOYEE_ID IN (174,178))
+AND EMPLOYEE_ID NOT IN(174, 178);
+--NONPAIRWISE
+SELECT EMPLOYEE_ID, MANAGER_ID, DEPARTMENT_ID
+FROM EMPLOYEES
+WHERE MANAGER_ID IN
+        (SELECT MANAGER_ID
+        FROM EMPLOYEES
+        WHERE EMPLOYEE_ID IN (174,178))
+AND     DEPARTMENT_ID IN
+       (SELECT DEPARTMENT_ID
+        FROM EMPLOYEES
+        WHERE EMPLOYEE_ID IN (174,178))
+AND EMPLOYEE_ID NOT IN(174, 178);
+--스칼라 서브쿼리 CASE
+SELECT EMPLOYEE_ID, LAST_NAME,
+        (CASE
+        WHEN DEPARTMENT_ID =
+                        (SELECT DEPARTMENT_ID
+                        FROM DEPARTMENTS
+                        WHERE LOCATION_ID = 1800)
+        THEN 'Canada' ELSE 'USA' END) LOCATION
+FROM EMPLOYEES;
+--스칼라 서브쿼리 ORDER BY
+SELECT EMPLOYEE_ID, LAST_NAME
+FROM EMPLOYEES E
+ORDER BY (SELECT DEPARTMENT_NAME
+            FROM DEPARTMENTS D
+            WHERE E.DEPARTMENT_ID = D.DEPARTMENT_ID);
+--연쇄 서브쿼리
+SELECT LAST_NAME, SALARY, DEPARTMENT_ID
+FROM EMPLOYEES OUTER
+WHERE SALARY >
+                (SELECT AVG(SALARY)
+                FROM EMPLOYEES
+                WHERE DEPARTMENT_ID = OUTER.DEPARTMENT_ID);
+--연쇄 서브쿼리
+SELECT E.EMPLOYEE_ID, LAST_NAME, E.JOB_ID
+FROM EMPLOYEES E
+WHERE 2 <= (SELECT COUNT(*)
+            FROM JOB_HISTORY
+            WHERE EMPLOYEE_ID = E.EMPLOYEE_ID);
+--연쇄 UPDATE
+ALTER TABLE EMPLOYEES
+MODIFY (DEPARTMENT_NAME VARCHAR2(20));
+
+UPDATE EMPLOYEES E
+SET DEPARTMENT_NAME = 
+            (SELECT DEPARTMENT_NAME
+            FROM DEPARTMENTS D
+            WHERE E.DEPARTMENT_ID = D.DEPARTMENT_ID);
+SELECT * FROM EMPLOYEES;
+COMMIT;
+--연쇄 DELETE
+DELETE EMPLOYEES E
+WHERE DEPARTMENT_NAME = 
+            (SELECT DEPARTMENT_NAME
+            FROM DEPARTMENTS D
+            WHERE E.DEPARTMENT_ID = D.DEPARTMENT_ID);
+ROLLBACK;
+--WITH절
+WITH
+DEPT_COSTS AS (
+            SELECT D.DEPARTMENT_NAME, SUM(E.SALARY) AS DEPT_TOTAL
+            FROM EMPLOYEES E, DEPARTMENTS D
+            WHERE E.DEPARTMENT_ID = D.DEPARTMENT_ID
+            GROUP BY D.DEPARTMENT_NAME),
+AVG_COST AS (
+        SELECT SUM(DEPT_TOTAL) / COUNT(*) AS DEPT_AVG
+        FROM DEPT_COSTS)
+SELECT *
+FROM DEPT_COSTS
+WHERE DEPT_TOTAL >
+    (SELECT DEPT_AVG
+    FROM AVG_COST)
+ORDER BY DEPARTMENT_NAME;
+--
+CREATE TABLE TEST09 (LINE VARCHAR2(3),
+                    SPEC VARCHAR2(10),
+                    ITEM VARCHAR2(8),
+                    QTY NUMBER,
+                    CONSTRAINTS TEST09_PK PRIMARY KEY (LINE,SPEC,ITEM)
+                    );
+CREATE TABLE TEST10 (IDATE VARCHAR2(8) NOT NULL,
+                    IN_SEQ VARCHAR2(3) NOT NULL,
+                    LINE VARCHAR2(3) NOT NULL,
+                    SPEC VARCHAR2(10) NOT NULL,
+                    CONSTRAINTS TEST10_PK
+                                PRIMARY KEY (IDATE,IN_SEQ,LINE)
+                    );
+--
+SELECT * FROM TEST09;
+SELECT * FROM TEST10;
+--1.공정투입정보(TEST10)의 공정과 SPEC 정보를 이용해 BOM(TEST09) 테이블에서 필요 부품 리스트 뽑기
+-- SUBQUERY 
+--1.1 NON-PAIRWISING
+SELECT DISTINCT ITEM
+FROM TEST09 
+WHERE LINE IN (SELECT LINE
+                FROM TEST10
+                WHERE IDATE = '19990203')
+AND      SPEC IN (SELECT SPEC
+                FROM TEST10
+                WHERE IDATE = '19990203')
+MINUS;
+SELECT DISTINCT ITEM
+FROM TEST09 
+WHERE (LINE, SPEC) IN (SELECT LINE, SPEC
+                FROM TEST10
+                WHERE IDATE = '19990203');
+SELECT * FROM TEST09
+WHERE ITEM = 'P16';
+SELECT * FROM TEST10
+WHERE LINE = 03 AND SPEC = 'A002';
+SELECT * FROM TEST10 WHERE SPEC = 'A002';
+--2.1999년 2월 3일 소요예상 부품의 부품별 개수를 파악해 발주를 내려 합니다.
+--  해당 날짜의 전체 공정에 투입될 부품리스트와 부품별 발주 수량을 뽑으시오.
+SELECT ITEM, SUM(QTY)
+FROM TEST09 A, TEST10 B
+WHERE A.LINE = B.LINE
+AND A.SPEC = B.SPEC
+GROUP BY ITEM
+ORDER BY 1;
+--3. 1999년 2월 3일 생산을 지원하기 위해 생산 전에 해당 생산 라인마다 필요한 부품을 정확히 공급해야 합니다.
+--3.1 생산라인마다 필요한 부품별 소요 갯수 파악
+SELECT A.LINE, A.ITEM, SUM(QTY)
+FROM TEST09 A, TEST10 B
+WHERE A.LINE = B.LINE
+AND A.SPEC = B.SPEC
+GROUP BY A.LINE, A.ITEM
+ORDER BY 1;
+--3.2 JUST IN TIME 생산을 위해 하루 2시간마다 5번 투입이 이루어진다면 투입 순번에 따라 두 시간마다 라인별로 투입되어야 할 부품의 개수를 구하시오
+SELECT CEIL(B.IN_SEQ/2), A.LINE, A.ITEM, SUM(A.QTY)
+FROM TEST09 A, TEST10 B
+WHERE A.LINE = B.LINE
+AND A.SPEC = B.SPEC
+GROUP BY CEIL(B.IN_SEQ/2), A.LINE, A.ITEM,A.LINE, A.ITEM
+ORDER BY 1,2,3;
+--과제
+--1. 사번,성명, 부서코드를 구해오되 부서장 사번이 빠른 순으로 정렬 (JOIN 없이 서브쿼리 사용)
+SELECT EMP_ID, EMP_NAME, DEPT_CODE
+FROM TEMP A
+ORDER BY (SELECT BOSS_ID
+          FROM TDEPT 
+          WHERE A.DEPT_CODE = DEPT_CODE);
+--2. 소속된 부서의 평균 봉급보다 많은 봉급을 받는 직원의 이름, 급여, 부서코드 
+SELECT EMP_NAME, SALARY, DEPT_CODE
+FROM TEMP A
+WHERE SALARY > (SELECT AVG(SALARY)
+                FROM TEMP
+                WHERE DEPT_CODE = A.DEPT_CODE);
+--3. 부서가 3개보다 많이 위치해 있는 지역에 위치한 부서에 근무하는 사원의 사번,이름,부서코드
+select a.emp_id, a.emp_name, a.dept_code
+from temp a, tdept b
+where a.dept_code = b.dept_code
+and 3 < (select count(dept_code) 
+            from TDEPT d 
+            where b.area = d.area 
+            group by area);
+--4. 이순신의 SALARY를 현재 직급의 상하한 평균으로 변경하는 쿼리 작성 후 COMMIT;
+UPDATE TEMP A
+SET SALARY = (SELECT (FROM_SAL+TO_SAL)/2 
+              FROM EMP_LEVEL 
+              WHERE LEV = A.LEV)
+WHERE EMP_NAME = '이순신';
+--5 근무지가 인천이면 10%, 서울이면 7%, 나머지는 5% 인상하여 UPDATE
+UPDATE TEMP A
+SET SALARY = (SELECT DECODE(AREA,'인천',A.SALARY*1.1,DECODE(AREA,'서울',A.SALARY*1.07,A.SALARY*1.05))
+                FROM TDEPT
+                WHERE A.DEPT_CODE = DEPT_CODE
+                );
+ROLLBACK;
+--6. 자신을 제외하고 자신과 직급이 같은 직원 누구보다도 더 많은 급여를 받는 직원 삭제
+SELECT * FROM TEMP1 A
+WHERE SALARY > ALL(SELECT SALARY 
+                   FROM TEMP B
+                   WHERE B.LEV = A.LEV
+                   AND A.EMP_ID <> B.EMP_ID);
+--
