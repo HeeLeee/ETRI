@@ -1,0 +1,309 @@
+﻿
+CREATE TABLE dept
+(
+	pardept               CHAR(18)  NOT NULL ,
+	deptnm                CHAR(18)  NULL ,
+	deptboss              CHAR(18)  NULL ,
+	위치                  CHAR(18)  NULL ,
+CONSTRAINT  XPKdept PRIMARY KEY (pardept)
+);
+
+
+
+CREATE TABLE EMP
+(
+	EMP_NO                VARCHAR2(10)  NOT NULL ,
+	EMPNM                 VARCHAR2(10)  NULL ,
+	REG_NO                VARCHAR2(20)  NULL ,
+	HP                    VARCHAR2(20)  NULL ,
+	WO_TM                 VARCHAR2(10)  NULL ,
+	PO                    VARCHAR2(10)  NULL ,
+	useyn                 VARCHAR2(18)  NULL ,
+	indate                VARCHAR2(18)  NULL ,
+	outdate               VARCHAR2(18)  NULL ,
+CONSTRAINT  XPK_EMP PRIMARY KEY (EMP_NO),
+CONSTRAINT  YN_CHECK_01 CHECK  (USETN IN ('Y','N')),
+CONSTRAINT  DATE_RULE1_02 CHECK  (INDATAE < OUTDATE)
+);
+
+
+
+CREATE INDEX XIF2사원 ON EMP
+(WO_TM  ASC);
+
+
+
+CREATE INDEX XIF4사원 ON EMP
+(PO  ASC);
+
+
+
+CREATE TABLE MCO
+(
+	MCO                   VARCHAR2(10)  NOT NULL ,
+	MCO_NM                VARCHAR2(10)  NULL ,
+	MDE                   VARCHAR2(10)  NULL ,
+CONSTRAINT  XPK_MCO PRIMARY KEY (MCO)
+);
+
+
+
+CREATE TABLE SCO
+(
+	SCO                   VARCHAR2(10)  NOT NULL ,
+	SCO_DES               VARCHAR2(30)  NULL ,
+	KY                    VARCHAR2(10)  NOT NULL ,
+	MCO                   VARCHAR2(10)  NOT NULL ,
+CONSTRAINT  XPK_SCO PRIMARY KEY (KY),
+CONSTRAINT  XAK1_UK1 UNIQUE (MCO,SCO)
+);
+
+
+
+CREATE INDEX XIF1상세코드 ON SCO
+(MCO  ASC);
+
+
+
+CREATE TABLE 강사
+(
+	강사계좌              CHAR(18)  NULL ,
+	생년월일              CHAR(18)  NULL ,
+	이름                  CHAR(18)  NULL ,
+	HP                    CHAR(18)  NULL ,
+	주소                  CHAR(18)  NULL ,
+	강사코드              CHAR(18)  NOT NULL ,
+	시간당_강의비         CHAR(18)  NULL ,
+	강의코드              CHAR(18)  NULL ,
+CONSTRAINT  XPK강사 PRIMARY KEY (강사코드)
+);
+
+
+
+CREATE TABLE 강의
+(
+	강의년도              CHAR(18)  NULL ,
+	강의명                CHAR(18)  NULL ,
+	수강인원              CHAR(18)  NULL ,
+	시작일자              CHAR(18)  NULL ,
+	강의일수              CHAR(18)  NULL ,
+	강의장소              CHAR(18)  NULL ,
+	종료일자              CHAR(18)  NULL ,
+	강의타입              CHAR(18)  NULL ,
+	특이사항              CHAR(18)  NULL ,
+	강의코드              CHAR(18)  NOT NULL ,
+	수업료                CHAR(18)  NULL ,
+	최대수강인원          CHAR(18)  NULL ,
+	커리큘럼              CHAR(18)  NULL ,
+	카테고리              CHAR(18)  NULL ,
+	최초개설일자          CHAR(18)  NULL ,
+	폐지이리자            CHAR(18)  NULL ,
+	최초수강인원          CHAR(18)  NULL ,
+	강사코드              CHAR(18)  NULL ,
+CONSTRAINT  XPK강의 PRIMARY KEY (강의코드)
+);
+
+
+
+CREATE TABLE 계약직
+(
+	월급여                CHAR(18)  NULL ,
+	계약시작일            CHAR(18)  NULL ,
+	계약종료일            CHAR(18)  NULL ,
+	EMP_NO                VARCHAR2(10)  NOT NULL ,
+CONSTRAINT  XPK계약직 PRIMARY KEY (EMP_NO)
+);
+
+
+
+CREATE INDEX XIF1계약직 ON 계약직
+(EMP_NO  ASC);
+
+
+
+CREATE TABLE 전문직
+(
+	계약금액              CHAR(18)  NULL ,
+	계약기간              CHAR(18)  NULL ,
+	EMP_NO                VARCHAR2(10)  NOT NULL ,
+CONSTRAINT  XPK전문직 PRIMARY KEY (EMP_NO)
+);
+
+
+
+CREATE INDEX XIF1전문직 ON 전문직
+(EMP_NO  ASC);
+
+
+
+CREATE TABLE 정규직
+(
+	연봉                  CHAR(18)  NULL ,
+	입사일자              CHAR(18)  NULL ,
+	EMP_NO                VARCHAR2(10)  NOT NULL ,
+CONSTRAINT  XPK정규직 PRIMARY KEY (EMP_NO)
+);
+
+
+
+CREATE INDEX XIF1정규직 ON 정규직
+(EMP_NO  ASC);
+
+
+
+CREATE TABLE 학생
+(
+	강의비납부여부        CHAR(18)  NULL ,
+	수업료                CHAR(18)  NULL ,
+	생년월일              CHAR(18)  NULL ,
+	이름                  CHAR(18)  NULL ,
+	HP                    CHAR(18)  NULL ,
+	주소                  CHAR(18)  NULL ,
+	학생코드              CHAR(18)  NOT NULL ,
+	강의코드              CHAR(18)  NULL ,
+CONSTRAINT  XPK학생 PRIMARY KEY (학생코드)
+);
+
+
+
+ALTER TABLE EMP
+	ADD (CONSTRAINT  R_24 FOREIGN KEY (WO_TM) REFERENCES SCO(KY) ON DELETE SET NULL);
+
+
+
+ALTER TABLE EMP
+	ADD (CONSTRAINT  R_26 FOREIGN KEY (PO) REFERENCES SCO(KY) ON DELETE SET NULL);
+
+
+
+ALTER TABLE SCO
+	ADD (CONSTRAINT  R_28 FOREIGN KEY (MCO) REFERENCES MCO(MCO));
+
+
+
+ALTER TABLE 계약직
+	ADD ( FOREIGN KEY (EMP_NO) REFERENCES EMP(EMP_NO) ON DELETE CASCADE);
+
+
+
+ALTER TABLE 전문직
+	ADD ( FOREIGN KEY (EMP_NO) REFERENCES EMP(EMP_NO) ON DELETE CASCADE);
+
+
+
+ALTER TABLE 정규직
+	ADD ( FOREIGN KEY (EMP_NO) REFERENCES EMP(EMP_NO) ON DELETE CASCADE);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE TABLE EMP
+(
+	EMP_NO                VARCHAR2(10)  NOT NULL ,
+	EMPNM                 VARCHAR2(10)  NULL ,
+	REG_NO                VARCHAR2(20)  NULL ,
+	TEL                   VARCHAR2(10)  NULL ,
+	WO_TM                 VARCHAR2(10)  NULL ,
+	PO                    VARCHAR2(10)  NULL ,
+	useyn                 VARCHAR2(18)  NULL ,
+	indate                VARCHAR2(18)  NULL ,
+	outdate               VARCHAR2(18)  NULL ,
+	SEX                   CHAR(18)  NULL  CONSTRAINT  SEX_CONFIRM CHECK (SEX IN ('M', 'W')),
+CONSTRAINT  R_24 FOREIGN KEY (WO_TM) REFERENCES SCO(KY) ON DELETE SET NULL,
+CONSTRAINT  R_26 FOREIGN KEY (PO) REFERENCES SCO(KY) ON DELETE SET NULL
+);
+
+
+
+CREATE UNIQUE INDEX XPK_EMP ON EMP
+(EMP_NO  ASC)
+	STORAGE ( 
+		INITIAL 1M
+		NEXT 1M
+	 )
+	TABLESPACE TS_INX01;
+
+
+
+ALTER TABLE EMP
+	ADD CONSTRAINT  XPK_EMP PRIMARY KEY (EMP_NO);
+
+CREATE INDEX EMP_INX_NAME ON EMP
+(EMP_NO  ASC,EMPNM  ASC)
+	STORAGE ( 
+		INITIAL 1M
+		NEXT 1M
+	 );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+CREATE TABLE EMP
+(
+	EMP_NO                VARCHAR2(10)  NOT NULL ,
+	EMPNM                 VARCHAR2(10)  NULL ,
+	REG_NO                VARCHAR2(20)  NULL ,
+	TEL                   VARCHAR2(10)  NULL ,
+	WO_TM                 VARCHAR2(10)  NULL ,
+	PO                    VARCHAR2(10)  NULL ,
+	useyn                 VARCHAR2(18)  NULL ,
+	indate                VARCHAR2(18)  NULL ,
+	outdate               VARCHAR2(18)  NULL ,
+	SEX                   CHAR(18)  NULL  CONSTRAINT  SEX_CONFIRM CHECK (SEX IN ('M', 'W')),
+CONSTRAINT  CITINO_INX UNIQUE (REG_NO),
+CONSTRAINT  R_24 FOREIGN KEY (WO_TM) REFERENCES SCO(KY) ON DELETE SET NULL,
+CONSTRAINT  R_26 FOREIGN KEY (PO) REFERENCES SCO(KY) ON DELETE SET NULL
+);
+
+
+
+CREATE UNIQUE INDEX XPK_EMP ON EMP
+(EMP_NO  ASC)
+	STORAGE ( 
+		INITIAL 1M
+		NEXT 1M
+	 )
+	TABLESPACE TS_INX01;
+
+
+
+ALTER TABLE EMP
+	ADD CONSTRAINT  XPK_EMP PRIMARY KEY (EMP_NO);
+
+
+
+CREATE INDEX EMP_INX_NAME ON EMP
+(EMPNM  ASC)
+	STORAGE ( 
+		INITIAL 1M
+		NEXT 1M
+	 )
+	TABLESPACE TS_INX01;
+

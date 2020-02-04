@@ -1,0 +1,92 @@
+﻿1. 학원관리 모델에서 표준 코드로 관리하여야 할 정보들을 추출하고 
+   엑셀에 정보들을 정의합니다
+
+2. 공통코드에서 ROLE Foreign Key 를 이용해 사원과 2건의 관계를 연결하고
+   데이터를 입력해 fk를 통한 무결성 관리 여부를 확인합니다.
+
+
+코드표준
+1. 엔티티 정의
+2. 관계 정의
+3. 데이터 입력
+4. 사원 정보 관계 (FK) 2개
+5. 코드메인, 상세, 사원 테이블 생성
+6. 사원 입력(채용, 직급)
+
+
+
+
+
+
+
+
+
+
+CREATE TABLE MCO
+(
+	MCO                   VARCHAR2(10)  NOT NULL ,
+	MCO_NM                VARCHAR2(10)  NULL ,
+	MDE                   VARCHAR2(10)  NULL 
+);
+
+
+
+CREATE UNIQUE INDEX XPK_MCO ON MCO
+(MCO  ASC);
+
+
+
+ALTER TABLE MCO
+	ADD CONSTRAINT  XPK_MCO PRIMARY KEY (MCO);
+
+
+
+CREATE TABLE SCO
+(
+	SCO                   VARCHAR2(10)  NOT NULL ,
+	SCO_DES               VARCHAR2(30)  NULL ,
+	KY                    VARCHAR2(10)  NOT NULL ,
+	MCO                   VARCHAR2(10)  NOT NULL 
+);
+
+
+
+CREATE UNIQUE INDEX XPK_SCO ON SCO
+(KY  ASC);
+
+
+
+ALTER TABLE SCO
+	ADD CONSTRAINT  XPK_SCO PRIMARY KEY (KY);
+
+
+
+CREATE UNIQUE INDEX XAK1_UK1 ON SCO
+(MCO  ASC,SCO  ASC);
+
+
+
+ALTER TABLE SCO
+ADD CONSTRAINT  XAK1_UK1 UNIQUE (MCO,SCO);
+
+
+
+CREATE TABLE EMP
+(
+	EMP_NO                VARCHAR2(10)  NOT NULL ,
+	EMP_NM              VARCHAR2(10)  NULL ,
+	REG_NO                VARCHAR2(20)  NULL ,
+	HP                    VARCHAR2(10)  NULL ,
+	WO_TM                 VARCHAR2(10)  NULL ,
+	PO                    VARCHAR2(10)  NULL 
+);
+
+
+
+CREATE UNIQUE INDEX XPK_EMP ON EMP
+(EMP_NO  ASC);
+
+
+
+ALTER TABLE EMP
+	ADD CONSTRAINT  XPK_EMP PRIMARY KEY (EMP_NO);
